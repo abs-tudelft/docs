@@ -1,0 +1,79 @@
+site_name: ABS Projects and Documentation
+site_url: https://abs-tudelft.github.io/absbook
+theme:
+  name: material
+  logo: assets/abs-logo.png
+  favicon: assets/abs-logo.png
+  features:
+    - navigation.instant
+    - navigation.tabs
+    - navigation.footer
+
+nav:
+  - Home: index.md
+  - Chisel debug tools:
+    - Tywaves:
+      - Tywaves project: debugtools/tywaves.md
+      - Chiselwatt use case: debugtools/tywaves-chiselwatt-usecase.md
+    - ChiselTrace: debugtools/chiseltrace.md
+  - Getting started with Tydi:
+    - What is Tydi?: tydi/what-is-tydi.md
+    - Playground: tydi/playground.md
+    - Writing interfaces: tydi/interface-code.md
+    - Integrations:
+      - Chisel: tydi/integrations/tydi-chisel.md
+      - HLS: tydi/integrations/hls.md
+      - VHDL: tydi/integrations/vhdl.md
+      - Clash: tydi/integrations/tydi-clash.md
+    - Technical specification (Tydispec):
+      - Intro: tydispec/intro.md
+      - Notation: tydispec/notation.md
+      - Physical streams: tydispec/physical.md
+      - Logical streams: tydispec/logical.md
+  # - MkDocs: mkdocs.md
+
+extra:
+  social:
+    - icon: fontawesome/brands/github 
+      link: https://github.com/abs-tudelft/
+      name: ABS GitHub
+
+plugins:
+    - search
+    - macros
+
+markdown_extensions:
+  # Arithmetic
+  - pymdownx.arithmatex:
+      generic: true
+  # Source code highlighting
+  - pymdownx.highlight:
+      anchor_linenums: true
+      line_spans: __span
+      pygments_lang_class: true
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
+  - pymdownx.superfences
+  # Tabs
+  - pymdownx.tabbed:
+      alternate_style: true
+  # Nice checkbox lists
+  - pymdownx.tasklist:
+      custom_checkbox: true
+  # Buttons
+  - attr_list
+  # Notes
+  - admonition
+  - pymdownx.details
+  # Other
+  - footnotes
+  - md_in_html
+
+extra_javascript:
+  - javascripts/katex.js
+  - https://unpkg.com/katex@0/dist/katex.min.js
+  - https://unpkg.com/katex@0/dist/contrib/auto-render.min.js
+
+extra_css:
+  - https://unpkg.com/katex@0/dist/katex.min.css
+  - stylesheets/styles.css

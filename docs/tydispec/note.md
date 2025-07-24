@@ -1,0 +1,2 @@
+!!! note
+    This technical specification of Tydi was written a few years ago before any real implementations using more advanced features of the spec were created. We are in the process of examining which parts of the specification may need to be revised. The majority of the content is, however, still relevant and correct.
