@@ -1,5 +1,5 @@
 site_name: ABS Projects and Documentation
-site_url: https://abs-tudelft.github.io/absbook
+site_url: https://abs-tudelft.github.io/docs
 theme:
   name: material
   logo: assets/abs-logo.png
