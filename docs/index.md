@@ -55,5 +55,5 @@ Tydi (Typed Dataflow Interface) is a specification that provides the same maturi
 3. Interface HDL generators for Chisel, VHDL, Verilog, etc, and
 4. Engineering parameters to fine-tune that interface. 
 
-[Discover Tydi](./tydi/WhatIsTydi.md){ .md-button }
+[Discover Tydi](./tydi/what-is-tydi.md){ .md-button }
 
