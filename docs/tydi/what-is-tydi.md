@@ -1,6 +1,6 @@
 # Understanding Tydi
 
-Tydi is a standard to exchange complex data types with variable-length sequences in a straightforward and HDL-agnostic manner.
+Tydi is a standard to exchange complex data types with variable-length sequences between components in a straightforward and HDL-agnostic manner.
 Variable-length refers to that the length of the sequence can be unknown when a data-stream starts. More information in the section [dimensionality information](#dimensionality-or-length-information).
 
 This getting-started guide will introduce you to Tydi's core principles and concepts.
@@ -69,11 +69,11 @@ Specifically, it also includes `string`s.
 
 A stream can contain any element.
 !!! note "Directly nesting streams"
-    A stream can even directly contain another stream. This is, however, not useful in most situations and only applicable in select situations. Normally you would increase the `dimensionality`.
+    A stream can even directly contain another stream. This is, however, not useful in most situations and only applicable in select situations. Normally you would increase the `dimensionality` parameter instead.
 
 ## Dissection of a stream
 
-In essence a `stream` is very similar to the universal concept of a handshaked signal. A handshaked signal consists of 3 sub-signals: `ready`, `valid`, and `data`. `valid` is used by the data-source to indicate that the data currently present on the `data` signal is valid and ready for transfer. `ready` is used by the data-sink to indicate that it (the sink component) is ready to receive data. When both `ready` and `valid` are asserted at the same time, a '_transfer_' takes place at the next active clock edge.
+In essence a `stream`, at the physical level, is very similar to the universal concept of a handshaked signal. A handshaked signal consists of 3 sub-signals: `ready`, `valid`, and `data`. `valid` is used by the data-source to indicate that the data currently present on the `data` signal is valid and ready for transfer. `ready` is used by the data-sink to indicate that it (the sink component) is ready to receive data. When both `ready` and `valid` are asserted at the same time, a '_transfer_' takes place at the next active clock edge.
 
 A Tydi stream is therefore a handshaked signal with a (maybe complexly) nested but fixed wire bundle as `data` sub-signal. What differentiates it starts at the dimensionality information.
 
@@ -96,9 +96,9 @@ data = [[[1, 2, 3], [4, 5]], [[ /* empty d3 */ ], [6, 7]], [ /* empty d2 */ ]]
 The comments indicate empty subsequences at the lowest and middle dimensions. This is supported by setting `last` flags appropriately.
 
 - The element `3` closes off the lowest dimension, so its `last` value will be `001`.
-- The element `4` does the same but also closes off the second dimension, so its `last` value is `011`.
+- The element `5` does the same but also closes off the second dimension, so its `last` value is `011`.
 - The next empty list also closes of the lowest dimension, but there is no data, so an 'empty' packet is sent with a `last` value of `001`.
-- The last empty list closes off the second dimension, resulting in an empty packet with `last=010`. Notice how the lowest dimension is not closed. This indicates that there was _no empty sequence_ at that dimension.
+- The last empty list closes off the second (and third) dimension, resulting in an empty packet with `last=110`. Notice how the lowest dimension is not closed. This indicates that there was _no empty sequence_ at that dimension.
 
 This shows an important distinction between 'normal' packets and 'empty' packets.
 
@@ -106,14 +106,15 @@ A normal, data-containing, packet will **always** contain data at the lowest dim
 
 Empty packets are an exception because there is no actual _data sequence_ to close off. Therefore, an empty packet can close off a higher dimension without closing all lower ones as well.
 
-How empty packets can be defined (in the sense of transferred) will be discussed later.
+An empty packet can be defined (in the sense of transferred) by turning off a [lane's data validity](#lane-validity) while setting the appropriate `last` bits.
 
 ## Engineering parameters
 By now we have collected the following signals: `ready`, `valid`, `data`, and `last`. For basic cases, this is all you need. However, Tydi supports some engineering parameters that allow designers to tune the performance and operation of their interfaces.
 
 ### Throughput
-To achieve higher throughput than is possible by sending one element at a time, a stream supports having multiple **lanes**. Each lane can transfer one element per transfer. A stream is said to have $N$ lanes.
+To achieve higher throughput than is possible by sending one element at a time, a stream supports having multiple **lanes**. Each lane can transfer one element per transfer. A stream is said to have $N$ lanes. As each lane transfers an element, a stream will also contain $N$ sets of $d$ `last` bits to encode dimensionality information for each element.
 
+#### Lane validity
 When a stream has multiple lanes ($N>1$), the handshaking of the signal still goes through the `ready` and `valid` signals. However, as the length of the data might not align with a multiple of $N$, a strategy to show which lanes carry element data and which do not is needed. Three signals are introduced that allow toggling lanes on and off. Their behavior depends on how the protocol is tuned, which is explained in the next section.
 
 - `stai` (start index) specifies from which index lanes should be considered to carry valid data.
@@ -122,8 +123,10 @@ When a stream has multiple lanes ($N>1$), the handshaking of the signal still go
 
 For any given lane of index $i$, the validity is given by $(\text{stai} \le i \le \text{endi}) \wedge (\text{strb}[i])$.
 
+As mentioned, to allow encoding [empty sequences](#empty-sequences-and-example), a lane's `last` information is still considered even when the lane is disabled.
+
 ### Protocol tuning
-To allow further customization of performance and offer a trade-off between source transfer generation effort and sink transfer reception effort, the Tydi protocol knows various variations. These are known as the protocol complexity level. A low protocol-complexity is very straightforward to understand, but does not allow for the highest throughput performance or processing flexibility. Examples of what protocol complexities exist and what transfers look like at these complexities are shown in the next section.
+To allow further customization of performance and offer a trade-off between source transfer generation effort and sink transfer reception effort, the Tydi protocol has several variations. These variations are chosen by the protocol complexity level. A low protocol-complexity is very straightforward to understand, but does not allow for the highest throughput performance or processing flexibility. A high protocol-complexity allows for the highest performance and flexibility but may be harder to ingest. Examples of what protocol complexities exist and what transfers look like at these complexities are shown in the next section.
 
 ## Visual signal overview
 The following diagram contains a visual explanation of each signal and their use at each protocol complexity level, together with an example transfer of the same data at that protocol-complexity. The data being transferred is a 2D character sequence: `["she", "is", "a", "dolphin"]`.
